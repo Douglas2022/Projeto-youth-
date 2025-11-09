@@ -2,44 +2,26 @@
 
 {% block conteudo %}
 <div class="container">
-    <h2>Bem-vindo, {{ nome }}</h2>
-
-    {% if mensagem %}
-        <p class="mensagem">{{ mensagem }}</p>
-    {% endif %}
+    <h2>Produtos Cadastrados</h2>
 
     {% if produtos %}
-        {% for produto in produtos %}
-        <div class="produto">
-            <h3>{{ produto.nome }}</h3>
-            <p>Marca: {{ produto.marca }}</p>
-            <p>Preço: R$ {{ produto.preco }}</p>
-
-            <!-- Comentários do produto -->
-            <h4>Comentários:</h4>
-            {% set comentarios_produto = comentarios | selectattr('produto_id', 'equalto', produto.id) | list %}
-            {% if comentarios_produto %}
-                <ul>
-                {% for comentario in comentarios_produto %}
-                    <li><strong>{{ comentario.nome_usuario }}:</strong> {{ comentario.texto }}</li>
-                {% endfor %}
-                </ul>
-            {% else %}
-                <p>Sem comentários ainda.</p>
-            {% endif %}
-
-            <!-- Formulário para comentar -->
-            <form method="POST" action="{{ url_for('cliente') }}">
-                <input type="hidden" name="produto_id" value="{{ produto.id }}">
-                <input type="text" name="texto" placeholder="Digite seu comentário" required>
-                <button type="submit">Comentar</button>
-            </form>
-
-            <hr>
+        <div class="produtos-lista">
+            {% for produto in produtos %}
+                <div class="produto" style="border:1px solid #ccc; padding:15px; margin-bottom:10px; border-radius:5px;">
+                    <h3>{{ produto.nome }}</h3>
+                    <p><strong>Marca:</strong> {{ produto.marca }}</p>
+                    <p><strong>Tipo:</strong> {{ produto.tipo }}</p>
+                    <p><strong>Preço:</strong> R$ {{ produto.preco }}</p>
+                    {% if produto.link %}
+                        <p><a href="{{ produto.link }}" target="_blank">Ver produto</a></p>
+                    {% endif %}
+                </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     {% else %}
         <p>Nenhum produto cadastrado.</p>
     {% endif %}
+
+    <a href="{{ url_for('cliente') }}" style="margin-top:20px; display:inline-block;">Voltar</a>
 </div>
 {% endblock %}

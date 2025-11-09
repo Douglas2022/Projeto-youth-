@@ -68,7 +68,7 @@ def login():
             else:
                 return redirect(url_for('cliente'))
         else:
-            return render_template('login.html', mensagem="CPF ou senha incorreta.")
+            return redirect('loja.html', mensagem="CPF ou senha incorreta.")
     return render_template('login.html')
 
 @app.route('/logout')
@@ -141,44 +141,43 @@ def historico():
 
     return render_template('historico.html', historico=historico_usuario, nome=session['usuario_nome'])
 
-@app.route('/produtos')
-def produtos():
+@app.route('/Loja', methods=['GET', 'POST'])
+def Loja():
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
+    mensagem = None
+    usuario_nome = session.get('usuario_nome', 'Anônimo')
+
     try:
         conexao = ConectarBanco()
         cursor = conexao.cursor(dictionary=True)
+
+        if request.method == 'POST':
+            produto_id = request.form.get('produto_id')
+            texto = request.form.get('texto')
+            if texto.strip():
+                sql_insert = "INSERT INTO comentarios (produto_id, nome_usuario, texto) VALUES (%s, %s, %s)"
+                cursor.execute(sql_insert, (produto_id, usuario_nome, texto))
+                conexao.commit()
+                mensagem = "Comentário enviado com sucesso!"
+
         cursor.execute("SELECT * FROM produtos")
-        lista_produtos = cursor.fetchall()
+        produtos = cursor.fetchall()
+
+        cursor.execute("SELECT * FROM comentarios ORDER BY id DESC")
+        comentarios = cursor.fetchall()
+
         cursor.close()
         conexao.close()
     except my.Error as err:
-        lista_produtos = []
-        print(f"Erro ao buscar produtos: {err}")
-    return render_template('produtos.html', produtos=lista_produtos)
+        produtos = []
+        comentarios = []
+        mensagem = f"Erro ao acessar dados: {err}"
 
-@app.route('/comentarios', methods=['GET', 'POST'])
-def comentarios():
-    mensagem = None
-    conexao = ConectarBanco()
-    cursor = conexao.cursor(dictionary=True)
+    return render_template('Loja.html', produtos=produtos, comentarios=comentarios, mensagem=mensagem, nome=usuario_nome)
 
-    if request.method == 'POST':
-        nome = session.get('usuario_nome', 'Anônimo')
-        texto = request.form.get('comentario')
-        if texto.strip():
-            try:
-                sql = "INSERT INTO comentarios (nome_usuario, texto) VALUES (%s, %s)"
-                cursor.execute(sql, (nome, texto))
-                conexao.commit()
-                mensagem = "Comentário enviado com sucesso!"
-            except my.Error as err:
-                mensagem = f"Erro ao salvar comentário: {err}"
 
-    cursor.execute("SELECT * FROM comentarios ORDER BY id DESC")
-    lista_comentarios = cursor.fetchall()
-    cursor.close()
-    conexao.close()
-
-    return render_template('comentarios.html', comentarios=lista_comentarios, mensagem=mensagem)
 
 # ---------------- ROTAS ADMIN ---------------- #
 

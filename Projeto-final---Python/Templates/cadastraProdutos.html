@@ -1,24 +1,6 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Cadastro de Produtos</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; text-align: center; border: 1px solid #ddd; }
-        th { background-color: #0056b3; color: white; }
-        tr:nth-child(even) { background-color: #f8f9fa; }
-        .btn-excluir { background-color:#dc3545; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; }
-        .btn-cadastrar { background-color:#28a745; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; }
-        .mensagem { color: green; font-weight: bold; margin-top: 10px; text-align:center; }
-    </style>
-</head>
-<body>
-    {% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block conteudo %}
-
 <h2>Cadastro de Produtos</h2>
 
 {% if mensagem %}
@@ -66,6 +48,14 @@
     </tbody>
 </table>
 
-</body>
-</html>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; text-align: center; border: 1px solid #ddd; }
+    th { background-color: #0056b3; color: white; }
+    tr:nth-child(even) { background-color: #f8f9fa; }
+    .btn-excluir { background-color:#dc3545; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; }
+    .btn-cadastrar { background-color:#d80b0b; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; }
+    .mensagem { color: rgb(231, 13, 13); font-weight: bold; margin-top: 10px; text-align:center; }
+</style>
 {% endblock %}
