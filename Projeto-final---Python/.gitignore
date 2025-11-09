@@ -1,0 +1,21 @@
+# Windows system
+Thumbs.db
+Desktop.ini
+*.lnk
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+.env/
+
+# IDEs
+.vscode/
+*.sln
+*.sqlite
+
+# OneDrive/Outros
+../*

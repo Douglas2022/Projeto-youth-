@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="container">
+    <h2>Login</h2>
+
+    {% if mensagem %}
+        <div class="mensagem">{{ mensagem }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <label for="CPF">CPF</label>
+        <input type="text" id="cpf" name="cpf" required>
+        
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" required>
+
+        <button type="submit">Entrar</button>
+    </form>
+</div>
+{% endblock %}

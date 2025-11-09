@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="container">
+    <h2>Lista de Produtos</h2>
+
+    {% if produtos %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Marca</th>
+                    <th>Preço</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produto in produtos %}
+                <tr>
+                    <td>{{ produto.nome }}</td>
+                    <td>{{ produto.marca }}</td>
+                    <td>{{ produto.preco }}</td>
+                    <td>
+                        <a href="{{ url_for('editar_produto', id=produto.id) }}">Editar</a>
+                        <a href="{{ url_for('excluir_produto', id=produto.id) }}" onclick="return confirm('Deseja excluir?')">Excluir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhum produto cadastrado.</p>
+    {% endif %}
+
+    <a href="{{ url_for('cadastrar_produto') }}">Cadastrar novo produto</a>
+</div>
+{% endblock %}

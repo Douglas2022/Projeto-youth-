@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<h1 class="container justify-content-center background-color" style="display: flex;">Página Inicial</h1>
+
+<div style="font-family: Arial, sans-serif; background-color: #2218de; margin: 0; padding: 0;">
+
+  <header style="background-color: #3c08d7; color: white; padding: 15px 20px; text-align: center;">
+    <h1>Supermercado Online</h1>
+    <p>Tudo o que você precisa em um só lugar 🛒</p>
+  </header>
+
+  <nav style="background-color: #c91c39; display: flex; justify-content: center; padding: 10px;">
+    <a href="{{ url_for('login') }}" style="color: white; text-decoration: none; margin: 0 15px; font-weight: bold;">Login</a>
+    <a href="{{ url_for('cadastro') }}" style="color: white; text-decoration: none; margin: 0 15px; font-weight: bold;">Cadastro</a>
+    <a href="{{ url_for('produtos') }}" style="color: white; text-decoration: none; margin: 0 15px; font-weight: bold;">Produtos</a>
+    
+    
+  </nav>
+
+  <section style="padding: 30px; text-align: center; color: white;">
+    <h2>Bem-vindo ao SuperSelectD!</h2>
+    <p>Compre seus produtos favoritos de forma rápida, segura e com os melhores preços.</p>
+    <a href="{{ url_for('produtos') }}">
+      <button class="boton" style="background-color: #1515c1; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+        Ver Produtos
+      </button>
+    </a>
+  </section>
+
+  <footer style="background-color: #2b0ed3; color: white; text-align: center; padding: 10px; margin-top: 30px;">
+    <p>SuperSelectD © 2025 - Todos os direitos reservados</p>
+  </footer>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+<style>
+            body {
+            font-family: Arial, sans-serif;
+            background-color: #0a2fc2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 60px auto;
+            background-color: rgb(215, 15, 15);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #2f3640;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #dcdde1;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #00a8ff;
+            color: white;
+            border: none;
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0097e6;
+        }
+    
+</style>
+
+{% block conteudo %}
+
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Histórico de Produtos</h2>
+
+  {% for produto in produtos %}
+  <div class="card mb-3">
+    <div class="card-header bg-info text-white">
+      <strong>{{ produto.nome }}</strong> (Categoria: {{ produto.categoria }}) - Cadastrado em: {{ produto.data_cadastro.strftime('%d/%m/%Y %H:%M') }}
+    </div>
+    <div class="card-body">
+      <p><strong>Preço:</strong> R$ {{ produto.preco }} | <strong>Estoque:</strong> {{ produto.estoque }}</p>
+      
+      <h5>Comentários:</h5>
+      <ul class="list-group">
+        {% for comentario in produto.comentarios %}
+          <li class="list-group-item">
+            {{ comentario.data_hora.strftime('%d/%m/%Y %H:%M') }} - {{ comentario.texto }}
+          </li>
+        {% else %}
+          <li class="list-group-item">Nenhum comentário registrado.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% else %}
+  <p>Nenhum produto cadastrado.</p>
+  {% endfor %}
+</div>
+
+{% endblock %}

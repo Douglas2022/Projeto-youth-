@@ -1,0 +1,56 @@
+<h3 style="margin-top: 30px; color: #d00000; text-align: center;">📦 Produtos Cadastrados</h3>
+
+{% if produtos %}
+<div style="overflow-x: auto; margin-top: 15px;">
+    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+        <thead style="background-color: #0056b3; color: white;">
+            <tr>
+                <th style="padding: 10px; text-align: center;">ID</th>
+                <th style="padding: 10px; text-align: center;">Nome</th>
+                <th style="padding: 10px; text-align: center;">Marca</th>
+                <th style="padding: 10px; text-align: center;">Tipo</th>
+                <th style="padding: 10px; text-align: center;">Preço</th>
+                <th style="padding: 10px; text-align: center;">Imagem</th>
+                <th style="padding: 10px; text-align: center;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            <tr style="background-color: {% if loop.index is even %}#f8f9fa{% else %}#ffffff{% endif %}; border-bottom: 1px solid #ddd;">
+                <td style="padding: 8px; text-align: center;">{{ produto.id }}</td>
+                <td style="padding: 8px;">{{ produto.nome }}</td>
+                <td style="padding: 8px;">{{ produto.marca }}</td>
+                <td style="padding: 8px;">{{ produto.tipo }}</td>
+                <td style="padding: 8px; text-align: center;">R$ {{ "%.2f"|format(produto.preco) }}</td>
+                <td style="padding: 8px; text-align: center;">
+                    <a href="{{ produto.link }}" target="_blank" style="color: #d00000; text-decoration: none; font-weight: bold;">
+                        Ver imagem 🔗
+                    </a>
+                </td>
+                <td style="padding: 8px; text-align: center;">
+                    <form action="{{ url_for('excluir_produto', id=produto.id) }}" 
+                          method="POST" 
+                          style="display:inline;"
+                          onsubmit="return confirm('Tem certeza que deseja excluir este produto?');">
+                        <button type="submit" 
+                                style="background-color:#dc3545; 
+                                       color:white; 
+                                       border:none; 
+                                       padding:6px 10px; 
+                                       border-radius:6px; 
+                                       cursor:pointer; 
+                                       font-weight:bold;">
+                            Excluir ❌
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p style="text-align: center; color: #0056b3; font-weight: bold; margin-top: 20px;">
+    Nenhum produto cadastrado ainda.
+</p>
+{% endif %}
