@@ -1,56 +1,71 @@
-<h3 style="margin-top: 30px; color: #d00000; text-align: center;">📦 Produtos Cadastrados</h3>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Produtos</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; text-align: center; border: 1px solid #ddd; }
+        th { background-color: #0056b3; color: white; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        .btn-excluir { background-color:#dc3545; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; }
+        .btn-cadastrar { background-color:#28a745; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; }
+        .mensagem { color: green; font-weight: bold; margin-top: 10px; text-align:center; }
+    </style>
+</head>
+<body>
+    {% extends 'base.html' %}
 
-{% if produtos %}
-<div style="overflow-x: auto; margin-top: 15px;">
-    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-        <thead style="background-color: #0056b3; color: white;">
-            <tr>
-                <th style="padding: 10px; text-align: center;">ID</th>
-                <th style="padding: 10px; text-align: center;">Nome</th>
-                <th style="padding: 10px; text-align: center;">Marca</th>
-                <th style="padding: 10px; text-align: center;">Tipo</th>
-                <th style="padding: 10px; text-align: center;">Preço</th>
-                <th style="padding: 10px; text-align: center;">Imagem</th>
-                <th style="padding: 10px; text-align: center;">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for produto in produtos %}
-            <tr style="background-color: {% if loop.index is even %}#f8f9fa{% else %}#ffffff{% endif %}; border-bottom: 1px solid #ddd;">
-                <td style="padding: 8px; text-align: center;">{{ produto.id }}</td>
-                <td style="padding: 8px;">{{ produto.nome }}</td>
-                <td style="padding: 8px;">{{ produto.marca }}</td>
-                <td style="padding: 8px;">{{ produto.tipo }}</td>
-                <td style="padding: 8px; text-align: center;">R$ {{ "%.2f"|format(produto.preco) }}</td>
-                <td style="padding: 8px; text-align: center;">
-                    <a href="{{ produto.link }}" target="_blank" style="color: #d00000; text-decoration: none; font-weight: bold;">
-                        Ver imagem 🔗
-                    </a>
-                </td>
-                <td style="padding: 8px; text-align: center;">
-                    <form action="{{ url_for('excluir_produto', id=produto.id) }}" 
-                          method="POST" 
-                          style="display:inline;"
-                          onsubmit="return confirm('Tem certeza que deseja excluir este produto?');">
-                        <button type="submit" 
-                                style="background-color:#dc3545; 
-                                       color:white; 
-                                       border:none; 
-                                       padding:6px 10px; 
-                                       border-radius:6px; 
-                                       cursor:pointer; 
-                                       font-weight:bold;">
-                            Excluir ❌
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% else %}
-<p style="text-align: center; color: #0056b3; font-weight: bold; margin-top: 20px;">
-    Nenhum produto cadastrado ainda.
-</p>
+{% block conteudo %}
+
+<h2>Cadastro de Produtos</h2>
+
+{% if mensagem %}
+    <p class="mensagem">{{ mensagem }}</p>
 {% endif %}
+
+<form method="POST">
+    <input type="text" name="nome" placeholder="Nome" required>
+    <input type="text" name="marca" placeholder="Marca" required>
+    <input type="text" name="tipo" placeholder="Tipo" required>
+    <input type="number" step="0.01" name="preco" placeholder="Preço" required>
+    <input type="text" name="link" placeholder="Link da imagem" required>
+    <button type="submit" class="btn-cadastrar">Cadastrar Produto</button>
+</form>
+
+<h3>Produtos Cadastrados</h3>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Marca</th>
+            <th>Tipo</th>
+            <th>Preço</th>
+            <th>Imagem</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for produto in produtos %}
+        <tr>
+            <td>{{ produto.id }}</td>
+            <td>{{ produto.nome }}</td>
+            <td>{{ produto.marca }}</td>
+            <td>{{ produto.tipo }}</td>
+            <td>R$ {{ "%.2f"|format(produto.preco) }}</td>
+            <td><a href="{{ produto.link }}" target="_blank">Ver imagem</a></td>
+            <td>
+                <form action="{{ url_for('excluir_produto', id=produto.id) }}" method="POST" onsubmit="return confirm('Deseja realmente excluir este produto?');">
+                    <button type="submit" class="btn-excluir">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
+{% endblock %}
