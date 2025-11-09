@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import mysql.connector as my
 
 app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta_aqui'  # Necessário para sessões
+app.secret_key = '12345'
+
 
 def ConectarBanco():
     return my.connect(
@@ -39,6 +40,8 @@ def cadastro():
             mensagem = f"Erro ao cadastrar: {err}"
     return render_template('cadastro.html', mensagem=mensagem)
 
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -68,8 +71,11 @@ def login():
             else:
                 return redirect(url_for('cliente'))
         else:
-            return redirect('loja.html', mensagem="CPF ou senha incorreta.")
+            # Aqui você renderiza novamente o login com a mensagem de erro
+            return render_template('login.html', mensagem="CPF ou senha incorreta.")
+    
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
@@ -141,27 +147,67 @@ def historico():
 
     return render_template('historico.html', historico=historico_usuario, nome=session['usuario_nome'])
 
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+import mysql.connector as my
+
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+import mysql.connector as my
+
 @app.route('/Loja', methods=['GET', 'POST'])
 def Loja():
-    if 'usuario_id' not in session:
-        return redirect(url_for('login'))
-
     mensagem = None
-    usuario_nome = session.get('usuario_nome', 'Anônimo')
+    usuario_nome = session.get('usuario_nome', None)
 
+    # Se o usuário ainda não estiver logado
+    if 'usuario_id' not in session:
+        if request.method == 'POST':
+            cpf_digitado = request.form.get('cpf', '').replace('.', '').replace('-', '')
+            senha = request.form.get('senha', '')
+
+            conexao = ConectarBanco()
+            cursor = conexao.cursor(dictionary=True)
+            cursor.execute('SELECT * FROM usuarios')
+            usuarios = cursor.fetchall()
+            cursor.close()
+            conexao.close()
+
+            usuario = None
+            for u in usuarios:
+                cpf_banco = u['cpf'].replace('.', '').replace('-', '')
+                if cpf_banco == cpf_digitado and u['senha'] == senha:
+                    usuario = u
+                    break
+
+            if usuario:
+                session['usuario_id'] = usuario['id']
+                session['usuario_nome'] = usuario['nome']
+                session['usuario_tipo'] = usuario['tipo'].strip().lower()
+                flash(f"Bem-vindo, {usuario['nome']}!", "sucesso")
+                return redirect(url_for('Loja'))
+            else:
+                flash("CPF ou senha incorretos.", "erro")
+
+        # Renderiza apenas o login se não estiver logado
+        return render_template('Loja.html', logado=False)
+
+    # Se o usuário estiver logado, mostra produtos e comentários
     try:
         conexao = ConectarBanco()
         cursor = conexao.cursor(dictionary=True)
 
+        # Envio de comentário
         if request.method == 'POST':
             produto_id = request.form.get('produto_id')
-            texto = request.form.get('texto')
-            if texto.strip():
+            texto = request.form.get('texto', '').strip()
+            if texto:
                 sql_insert = "INSERT INTO comentarios (produto_id, nome_usuario, texto) VALUES (%s, %s, %s)"
                 cursor.execute(sql_insert, (produto_id, usuario_nome, texto))
                 conexao.commit()
-                mensagem = "Comentário enviado com sucesso!"
+                flash("Comentário enviado com sucesso!", "sucesso")
+            else:
+                flash("O comentário não pode estar vazio.", "erro")
 
+        # Buscar produtos e comentários
         cursor.execute("SELECT * FROM produtos")
         produtos = cursor.fetchall()
 
@@ -173,11 +219,9 @@ def Loja():
     except my.Error as err:
         produtos = []
         comentarios = []
-        mensagem = f"Erro ao acessar dados: {err}"
+        flash(f"Erro ao acessar dados: {err}", "erro")
 
-    return render_template('Loja.html', produtos=produtos, comentarios=comentarios, mensagem=mensagem, nome=usuario_nome)
-
-
+    return render_template('Loja.html', logado=True, produtos=produtos, comentarios=comentarios, nome=usuario_nome)
 
 # ---------------- ROTAS ADMIN ---------------- #
 
