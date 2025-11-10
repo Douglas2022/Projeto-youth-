@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import mysql.connector as my
 
 app = Flask(__name__)
@@ -40,8 +40,6 @@ def cadastro():
             mensagem = f"Erro ao cadastrar: {err}"
     return render_template('cadastro.html', mensagem=mensagem)
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -71,7 +69,6 @@ def login():
             else:
                 return redirect(url_for('cliente'))
         else:
-            # Aqui você renderiza novamente o login com a mensagem de erro
             return render_template('login.html', mensagem="CPF ou senha incorreta.")
     
     return render_template('login.html')
@@ -81,6 +78,7 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
 
 # ---------------- ROTAS CLIENTE ---------------- #
 
@@ -120,134 +118,6 @@ def cliente():
 
     return render_template('cliente.html', produtos=produtos, comentarios=comentarios, mensagem=mensagem, nome=usuario_nome)
 
-@app.route('/historico')
-def historico():
-    if 'usuario_id' not in session:
-        return redirect(url_for('login'))
-
-    try:
-        conexao = ConectarBanco()
-        cursor = conexao.cursor(dictionary=True)
-
-        sql = """
-            SELECT h.id, p.nome AS produto, p.marca, p.preco, h.data_compra
-            FROM historico_compras h
-            JOIN produtos p ON h.produto_id = p.id
-            WHERE h.usuario_id = %s
-            ORDER BY h.data_compra DESC
-        """
-        cursor.execute(sql, (session['usuario_id'],))
-        historico_usuario = cursor.fetchall()
-
-        cursor.close()
-        conexao.close()
-    except my.Error as err:
-        historico_usuario = []
-        print(f"Erro ao buscar histórico: {err}")
-
-    return render_template('historico.html', historico=historico_usuario, nome=session['usuario_nome'])
-
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-import mysql.connector as my
-
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-import mysql.connector as my
-
-@app.route('/comentar/<int:produto_id>', methods=['POST'])
-def comentar_produto(produto_id):
-    nome_usuario = request.form.get('nome_usuario')
-    texto = request.form.get('texto')
-
-    try:
-        conexao = ConectarBanco()
-        cursor = conexao.cursor()
-        cursor.execute("INSERT INTO comentarios (produto_id, nome_usuario, texto) VALUES (%s, %s, %s)",
-                       (produto_id, nome_usuario, texto))
-        conexao.commit()
-        cursor.close()
-        conexao.close()
-        flash("Comentário adicionado!", "sucesso")
-    except Exception as e:
-        print("Erro ao adicionar comentário:", e)
-        flash("Erro ao adicionar comentário.", "erro")
-
-    return redirect(url_for('Loja'))
-
-
-
-@app.route('/Loja', methods=['GET', 'POST'])
-def Loja():
-    usuario_nome = session.get('usuario_nome', None)
-
-    # 🔒 Se o usuário não estiver logado:
-    if 'usuario_id' not in session:
-        if request.method == 'POST':
-            cpf_digitado = request.form.get('cpf', '').replace('.', '').replace('-', '')
-            senha = request.form.get('senha', '')
-
-            conexao = ConectarBanco()
-            cursor = conexao.cursor(dictionary=True)
-            cursor.execute('SELECT * FROM usuarios')
-            usuarios = cursor.fetchall()
-            cursor.close()
-            conexao.close()
-
-            # Verifica login
-            usuario = None
-            for u in usuarios:
-                cpf_banco = u['cpf'].replace('.', '').replace('-', '')
-                if cpf_banco == cpf_digitado and u['senha'] == senha:
-                    usuario = u
-                    break
-
-            if usuario:
-                session['usuario_id'] = usuario['id']
-                session['usuario_nome'] = usuario['nome']
-                session['usuario_tipo'] = usuario['tipo'].strip().lower()
-                flash(f"Bem-vindo, {usuario['nome']}!", "sucesso")
-                return redirect(url_for('Loja'))
-            else:
-                flash("CPF ou senha incorretos.", "erro")
-
-        # Exibe tela de login se não estiver logado
-        return render_template('Loja.html', logado=False)
-
-    # ✅ Usuário logado: pega produtos e comentários
-    try:
-        conexao = ConectarBanco()
-        cursor = conexao.cursor(dictionary=True)
-
-        # Pega produtos
-        cursor.execute("SELECT * FROM produtos")
-        produtos = cursor.fetchall()
-        print("DEBUG - Produtos carregados:", produtos)  # 🔹 Debug: veja se produtos chegam
-
-        # Pega comentários
-        cursor.execute("SELECT * FROM comentarios ORDER BY id DESC")
-        comentarios = cursor.fetchall()
-        print("DEBUG - Comentários carregados:", comentarios)  # 🔹 Debug: veja se comentários chegam
-
-        cursor.close()
-        conexao.close()
-
-        return render_template(
-            'Loja.html',
-            logado=True,
-            usuario_nome=usuario_nome,
-            produtos=produtos,
-            comentarios=comentarios
-        )
-
-    except Exception as e:
-        print("Erro ao carregar produtos:", e)
-        flash("Erro ao carregar produtos.", "erro")
-        return render_template(
-            'Loja.html',
-            logado=True,
-            produtos=[],
-            comentarios=[],
-            usuario_nome=usuario_nome
-        )
 
 # ---------------- ROTAS ADMIN ---------------- #
 
@@ -276,28 +146,88 @@ def cadastraProdutos():
         except my.Error as err:
             mensagem = f"Erro ao cadastrar produto: {err}"
 
+    # Buscar produtos e comentários
     cursor.execute("SELECT * FROM produtos")
     produtos = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM comentarios ORDER BY id DESC")
+    comentarios = cursor.fetchall()
+
     cursor.close()
     conexao.close()
 
-    return render_template('cadastraProdutos.html', mensagem=mensagem, produtos=produtos)
+    return render_template('cadastraProdutos.html',
+                           mensagem=mensagem,
+                           produtos=produtos,
+                           comentarios=comentarios,
+                           usuario_tipo=session.get('usuario_tipo'))
+
 
 @app.route('/excluir_produto/<int:id>', methods=['POST'])
 def excluir_produto(id):
+    # Verifica se o usuário está logado e é administrador
     if 'usuario_id' not in session or session.get('usuario_tipo') != 'administrador':
+        flash("Acesso negado.", "erro")
         return redirect(url_for('login'))
 
     try:
         conexao = ConectarBanco()
         cursor = conexao.cursor()
+
+        # Exclui o produto com o ID recebido
         cursor.execute("DELETE FROM produtos WHERE id = %s", (id,))
+        conexao.commit()
+
+        flash("Produto excluído com sucesso!", "sucesso")
+    except my.Error as e:
+        flash(f"Erro ao excluir produto: {e}", "erro")
+    finally:
+        cursor.close()
+        conexao.close()
+
+    return redirect(url_for('cadastraProdutos'))
+
+@app.route('/excluir_comentario/<int:comentario_id>', methods=['POST'])
+def excluir_comentario(comentario_id):
+    if 'usuario_id' not in session or session.get('usuario_tipo') != 'administrador':
+        flash("Acesso negado.", "erro")
+        return redirect(url_for('Loja'))
+
+    try:
+        conexao = ConectarBanco()
+        cursor = conexao.cursor()
+        cursor.execute("DELETE FROM comentarios WHERE id = %s", (comentario_id,))
         conexao.commit()
         cursor.close()
         conexao.close()
-        return redirect(url_for('cadastraProdutos'))
+        flash("Comentário excluído com sucesso!", "sucesso")
     except my.Error as e:
-        return f"Erro ao excluir produto: {e}"
+        flash(f"Erro ao excluir comentário: {e}", "erro")
+
+    return redirect(url_for('cadastraProdutos'))
+
+
+
+@app.route('/comentar/<int:produto_id>', methods=['POST'])
+def comentar_produto(produto_id):
+    nome_usuario = request.form.get('nome_usuario')
+    texto = request.form.get('texto')
+
+    try:
+        conexao = ConectarBanco()
+        cursor = conexao.cursor()
+        cursor.execute("INSERT INTO comentarios (produto_id, nome_usuario, texto) VALUES (%s, %s, %s)",
+                       (produto_id, nome_usuario, texto))
+        conexao.commit()
+        cursor.close()
+        conexao.close()
+        flash("Comentário adicionado!", "sucesso")
+    except Exception as e:
+        print("Erro ao adicionar comentário:", e)
+        flash("Erro ao adicionar comentário.", "erro")
+
+    return redirect(url_for('Loja'))
+
 
 # ---------------- MIDDLEWARE ---------------- #
 
@@ -307,7 +237,6 @@ def proteger_rotas_admin():
     if request.endpoint in admin_routes and session.get('usuario_tipo') != 'administrador':
         return redirect(url_for('login'))
 
-# ---------------- RODA O FLASK ---------------- #
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)

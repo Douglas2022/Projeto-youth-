@@ -1,61 +1,178 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
-<h2>Cadastro de Produtos</h2>
+<h2 style="text-align:center; margin-bottom: 20px;">Cadastro e Gerenciamento de Produtos</h2>
 
 {% if mensagem %}
     <p class="mensagem">{{ mensagem }}</p>
 {% endif %}
 
-<form method="POST">
-    <input type="text" name="nome" placeholder="Nome" required>
-    <input type="text" name="marca" placeholder="Marca" required>
-    <input type="text" name="tipo" placeholder="Tipo" required>
-    <input type="number" step="0.01" name="preco" placeholder="Preço" required>
-    <input type="text" name="link" placeholder="Link da imagem" required>
-    <button type="submit" class="btn-cadastrar">Cadastrar Produto</button>
-</form>
+<div class="form-container">
+    <form method="POST">
+        <input type="text" name="nome" placeholder="Nome" required>
+        <input type="text" name="marca" placeholder="Marca" required>
+        <input type="text" name="tipo" placeholder="Tipo" required>
+        <input type="number" step="0.01" name="preco" placeholder="Preço" required>
+        <input type="text" name="link" placeholder="Link da imagem" required>
+        <button type="submit" class="btn-cadastrar">Cadastrar Produto</button>
+    </form>
+</div>
 
-<h3>Produtos Cadastrados</h3>
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Marca</th>
-            <th>Tipo</th>
-            <th>Preço</th>
-            <th>Imagem</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for produto in produtos %}
-        <tr>
-            <td>{{ produto.id }}</td>
-            <td>{{ produto.nome }}</td>
-            <td>{{ produto.marca }}</td>
-            <td>{{ produto.tipo }}</td>
-            <td>R$ {{ "%.2f"|format(produto.preco) }}</td>
-            <td><a href="{{ produto.link }}" target="_blank">Ver imagem</a></td>
-            <td>
-                <form action="{{ url_for('excluir_produto', id=produto.id) }}" method="POST" onsubmit="return confirm('Deseja realmente excluir este produto?');">
-                    <button type="submit" class="btn-excluir">Excluir</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="produtos-container">
+    {% for produto in produtos %}
+    <div class="card">
+        {% if produto.link %}
+        <img src="{{ produto.link }}" alt="{{ produto.nome }}" class="card-img">
+        {% else %}
+        <img src="https://via.placeholder.com/140x70?text=Sem+Imagem" alt="Sem imagem" class="card-img">
+        {% endif %}
+
+        <h4>{{ produto.nome }}</h4>
+        <p><strong>Marca:</strong> {{ produto.marca }}</p>
+        <p><strong>Tipo:</strong> {{ produto.tipo }}</p>
+        <p><strong>Preço:</strong> R$ {{ "%.2f"|format(produto.preco) }}</p>
+
+        {% if usuario_tipo == 'administrador' %}
+        <form action="{{ url_for('excluir_produto', id=produto.id) }}" method="POST" 
+              onsubmit="return confirm('Deseja realmente excluir este produto?');" class="btn-produto-container">
+            <button type="submit" class="btn-excluir">Excluir Produto</button>
+        </form>
+        {% endif %}
+
+        <div class="comentarios-container">
+            <strong>Comentários:</strong>
+            {% set tem_comentario = false %}
+            {% for comentario in comentarios %}
+                {% if comentario.produto_id == produto.id %}
+                <div class="card-comentario">
+                    <span><strong>{{ comentario.nome_usuario }}:</strong> {{ comentario.texto }}</span>
+                    {% if usuario_tipo == 'administrador' %}
+                    <form method="POST" action="{{ url_for('excluir_comentario', comentario_id=comentario.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-excluir-comentario">Excluir</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% set tem_comentario = true %}
+                {% endif %}
+            {% endfor %}
+            {% if not tem_comentario %}
+                <span style="font-size:11px; color:#555;">Sem comentários ainda</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 10px; text-align: center; border: 1px solid #ddd; }
-    th { background-color: #0056b3; color: white; }
-    tr:nth-child(even) { background-color: #f8f9fa; }
-    .btn-excluir { background-color:#dc3545; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; }
-    .btn-cadastrar { background-color:#d80b0b; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; }
-    .mensagem { color: rgb(231, 13, 13); font-weight: bold; margin-top: 10px; text-align:center; }
+body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+
+.form-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+form input {
+    padding: 5px;
+    margin: 2px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size:12px;
+}
+
+.btn-cadastrar {
+    background-color:#d80b0b;
+    color:white;
+    border:none;
+    padding:5px 10px;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+.btn-cadastrar:hover { background-color:#b10707; }
+
+.produtos-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 8px;
+    width: 140px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.card-img {
+    width: 100%;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.comentarios-container {
+    margin-top: 5px;
+}
+
+.card-comentario {
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    padding: 3px 5px;
+    margin-bottom: 3px;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-excluir {
+    background-color:#dc3545;
+    color:white;
+    border:none;
+    padding:3px 6px;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:11px;
+    margin-top:4px;
+}
+
+.btn-excluir:hover { background-color:#a71d2a; }
+
+.btn-excluir-comentario {
+    background-color:transparent;
+    border:none;
+    color:red;
+    cursor:pointer;
+    font-size:10px;
+}
+
+.btn-produto-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.mensagem {
+    color: rgb(231, 13, 13);
+    font-weight: bold;
+    margin-top: 10px;
+    text-align:center;
+}
 </style>
 {% endblock %}

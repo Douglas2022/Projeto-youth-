@@ -1,37 +1,138 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
-<div class="container">
-    <h2>Lista de Produtos</h2>
+<h2 style="text-align:center; margin-bottom: 20px;">Bem-vindo à Loja Virtual</h2>
 
-    {% if produtos %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Marca</th>
-                    <th>Preço</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for produto in produtos %}
-                <tr>
-                    <td>{{ produto.nome }}</td>
-                    <td>{{ produto.marca }}</td>
-                    <td>{{ produto.preco }}</td>
-                    <td>
-                        <a href="{{ url_for('editar_produto', id=produto.id) }}">Editar</a>
-                        <a href="{{ url_for('excluir_produto', id=produto.id) }}" onclick="return confirm('Deseja excluir?')">Excluir</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>Nenhum produto cadastrado.</p>
+{% if not logado %}
+<div style="text-align:center; margin-top:40px;">
+    <h3>Faça login para acessar os produtos</h3>
+    <form method="POST" style="margin-top:20px;">
+        <input type="text" name="cpf" placeholder="Digite seu CPF" required
+               style="padding:8px; border-radius:5px; border:1px solid #ccc; width:200px;"><br><br>
+        <input type="password" name="senha" placeholder="Digite sua senha" required
+               style="padding:8px; border-radius:5px; border:1px solid #ccc; width:200px;"><br><br>
+        <button type="submit"
+                style="background-color:#007bff; color:white; border:none; padding:8px 16px; border-radius:5px; cursor:pointer;">
+            Entrar
+        </button>
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for categoria, mensagem in messages %}
+            <p style="color:{% if categoria == 'erro' %}red{% else %}green{% endif %}; font-weight:bold;">
+                {{ mensagem }}
+            </p>
+        {% endfor %}
     {% endif %}
-
-    <a href="{{ url_for('cadastrar_produto') }}">Cadastrar novo produto</a>
+    {% endwith %}
 </div>
+
+{% else %}
+
+<div class="produtos-container">
+    {% for produto in produtos %}
+    <div class="card">
+        {% if produto.link %}
+            <img src="{{ produto.link }}" alt="{{ produto.nome }}" class="card-img">
+        {% else %}
+            <img src="https://via.placeholder.com/150x100?text=Sem+Imagem" alt="Sem imagem" class="card-img">
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title">{{ produto.nome }}</h5>
+            <p class="card-text">
+                <strong>Marca:</strong> {{ produto.marca }}<br>
+                <strong>Preço:</strong> R$ {{ "%.2f"|format(produto.preco) }}<br>
+
+                {% if usuario_tipo == 'administrador' %}
+                <strong>Comentários:</strong><br>
+                {% set tem_comentario = false %}
+                {% for comentario in comentarios %}
+                    {% if comentario.produto_id == produto.id %}
+                        <span style="font-size:11px; color:#555;">
+                            - {{ comentario.nome_usuario }}: {{ comentario.texto }}
+                            <form method="POST" action="{{ url_for('excluir_comentario', comentario_id=comentario.id) }}" style="display:inline;">
+                                <button type="submit" style="background:none; border:none; color:red; cursor:pointer;">[Excluir]</button>
+                            </form>
+                        </span><br>
+                        {% set tem_comentario = true %}
+                    {% endif %}
+                {% endfor %}
+                {% if not tem_comentario %}
+                    <span style="font-size:11px; color:#555;">Sem comentários ainda</span>
+                {% endif %}
+                {% else %}
+                <!-- Clientes comentam -->
+                <form method="POST" action="{{ url_for('comentar_produto', produto_id=produto.id) }}" style="margin-top:6px;">
+                    <input type="hidden" name="nome_usuario" value="{{ usuario_nome }}">
+                    <input type="text" name="texto" placeholder="Escreva um comentário" required
+                           style="width:100%; padding:4px; font-size:12px; border-radius:4px; border:1px solid #ccc; margin-bottom:4px;">
+                    <button type="submit" style="background-color:red; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer;">
+                        Comentar
+                    </button>
+                </form>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endif %}
+
+<style>
+.produtos-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.card {
+    background-color: #fff;
+    border: 2px solid #0056b3;
+    border-radius: 10px;
+    width: 130px;
+    height: 240px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 6px;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.card-img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.card-body {
+    padding: 4px 0;
+}
+
+.card-title {
+    font-size: 13px;
+    margin: 3px 0;
+    color: #0d47a1;
+}
+
+.card-text {
+    font-size: 11px;
+    color: #333;
+    text-align: left;
+    padding: 0 4px;
+    line-height: 1.2;
+}
+
+.card-text strong {
+    color: #0d47a1;
+}
+</style>
 {% endblock %}

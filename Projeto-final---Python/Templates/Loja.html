@@ -42,29 +42,53 @@
         {% else %}
             <img src="https://via.placeholder.com/150x100?text=Sem+Imagem" alt="Sem imagem" class="card-img">
         {% endif %}
+
         <div class="card-body">
             <h5 class="card-title">{{ produto.nome }}</h5>
             <p class="card-text">
                 <strong>Marca:</strong> {{ produto.marca }}<br>
-                <strong>Preço:</strong> R$ {{ "%.2f"|format(produto.preco) }}<br>
-                <strong>Comentários:</strong><br>
+                <strong>Preço:</strong> R$ {{ "%.2f"|format(produto.preco) }}
+            </p>
+
+            <!-- ADMIN: Botão para excluir produto -->
+            {% if usuario_tipo == 'administrador' %}
+            <form method="POST" action="{{ url_for('excluir_produto', produto_id=produto.id) }}">
+                <button type="submit" style="background-color:darkred; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:11px; cursor:pointer;">
+                    Excluir Produto
+                </button>
+            </form>
+            {% endif %}
+
+            <hr style="margin:4px 0;">
+
+            <!-- Comentários -->
+            <div class="comentarios">
+                <strong style="font-size:12px;">Comentários:</strong><br>
                 {% set tem_comentario = false %}
                 {% for comentario in comentarios %}
                     {% if comentario.produto_id == produto.id %}
-                        <span style="font-size:11px; color:#555;">- {{ comentario.nome_usuario }}: {{ comentario.texto }}</span><br>
+                        <div style="font-size:11px; color:#333; margin-top:2px;">
+                            <b>{{ comentario.nome_usuario }}:</b> {{ comentario.texto }}
+                            {% if usuario_tipo == 'administrador' %}
+                                <form method="POST" action="{{ url_for('excluir_comentario', comentario_id=comentario.id) }}" style="display:inline;">
+                                    <button type="submit" style="background:none; border:none; color:red; font-size:11px; cursor:pointer;">[Excluir]</button>
+                                </form>
+                            {% endif %}
+                        </div>
                         {% set tem_comentario = true %}
                     {% endif %}
                 {% endfor %}
                 {% if not tem_comentario %}
-                    <span style="font-size:11px; color:#555;">Sem comentários ainda</span>
+                    <span style="font-size:11px; color:#555;">Sem comentários</span>
                 {% endif %}
-            </p>
+            </div>
 
+            <!-- Formulário de comentário -->
             <form method="POST" action="{{ url_for('comentar_produto', produto_id=produto.id) }}" style="margin-top:6px;">
                 <input type="hidden" name="nome_usuario" value="{{ usuario_nome }}">
                 <input type="text" name="texto" placeholder="Escreva um comentário" required
                        style="width:100%; padding:4px; font-size:12px; border-radius:4px; border:1px solid #ccc; margin-bottom:4px;">
-                <button type="submit" style="background-color:red; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer;">
+                <button type="submit" style="background-color:#007bff; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer;">
                     Comentar
                 </button>
             </form>
@@ -81,7 +105,7 @@
 .produtos-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px; /* mais espaço entre os cards */
+    gap: 15px;
     justify-content: center;
     margin-top: 20px;
 }
@@ -90,8 +114,8 @@
     background-color: #fff;
     border: 2px solid #0056b3;
     border-radius: 10px;
-    width: 130px; /* card menor */
-    height: 240px; /* card menor */
+    width: 160px;
+    height: auto;
     text-align: center;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     transition: transform 0.2s, box-shadow 0.2s;
