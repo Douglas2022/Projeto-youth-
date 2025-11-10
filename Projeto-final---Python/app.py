@@ -153,6 +153,27 @@ import mysql.connector as my
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import mysql.connector as my
 
+@app.route('/comentar/<int:produto_id>', methods=['POST'])
+def comentar_produto(produto_id):
+    nome_usuario = request.form.get('nome_usuario')
+    texto = request.form.get('texto')
+
+    try:
+        conexao = ConectarBanco()
+        cursor = conexao.cursor()
+        cursor.execute("INSERT INTO comentarios (produto_id, nome_usuario, texto) VALUES (%s, %s, %s)",
+                       (produto_id, nome_usuario, texto))
+        conexao.commit()
+        cursor.close()
+        conexao.close()
+        flash("Comentário adicionado!", "sucesso")
+    except Exception as e:
+        print("Erro ao adicionar comentário:", e)
+        flash("Erro ao adicionar comentário.", "erro")
+
+    return redirect(url_for('Loja'))
+
+
 
 @app.route('/Loja', methods=['GET', 'POST'])
 def Loja():
@@ -191,12 +212,21 @@ def Loja():
         # Exibe tela de login se não estiver logado
         return render_template('Loja.html', logado=False)
 
-    # ✅ Se o usuário estiver logado, mostra produtos em cards
+    # ✅ Usuário logado: pega produtos e comentários
     try:
         conexao = ConectarBanco()
         cursor = conexao.cursor(dictionary=True)
+
+        # Pega produtos
         cursor.execute("SELECT * FROM produtos")
         produtos = cursor.fetchall()
+        print("DEBUG - Produtos carregados:", produtos)  # 🔹 Debug: veja se produtos chegam
+
+        # Pega comentários
+        cursor.execute("SELECT * FROM comentarios ORDER BY id DESC")
+        comentarios = cursor.fetchall()
+        print("DEBUG - Comentários carregados:", comentarios)  # 🔹 Debug: veja se comentários chegam
+
         cursor.close()
         conexao.close()
 
@@ -204,13 +234,20 @@ def Loja():
             'Loja.html',
             logado=True,
             usuario_nome=usuario_nome,
-            produtos=produtos
+            produtos=produtos,
+            comentarios=comentarios
         )
 
     except Exception as e:
         print("Erro ao carregar produtos:", e)
         flash("Erro ao carregar produtos.", "erro")
-        return render_template('Loja.html', logado=True, produtos=[], usuario_nome=usuario_nome)
+        return render_template(
+            'Loja.html',
+            logado=True,
+            produtos=[],
+            comentarios=[],
+            usuario_nome=usuario_nome
+        )
 
 # ---------------- ROTAS ADMIN ---------------- #
 
