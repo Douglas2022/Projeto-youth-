@@ -1,8 +1,36 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
-<h2 style="text-align:center; margin-bottom: 20px; color:#003366;">Bem-vindo à Loja Virtual</h2>
+<h2 style="text-align:center; margin-bottom: 20px;">Bem-vindo à Loja Virtual</h2>
 
+{% if not logado %}
+<!-- 🧠 Tela de Login -->
+<div style="text-align:center; margin-top:40px;">
+    <h3>Faça login para acessar os produtos</h3>
+    <form method="POST" style="margin-top:20px;">
+        <input type="text" name="cpf" placeholder="Digite seu CPF" required
+               style="padding:8px; border-radius:5px; border:1px solid #ccc; width:200px;"><br><br>
+        <input type="password" name="senha" placeholder="Digite sua senha" required
+               style="padding:8px; border-radius:5px; border:1px solid #ccc; width:200px;"><br><br>
+        <button type="submit"
+                style="background-color:#007bff; color:white; border:none; padding:8px 16px; border-radius:5px; cursor:pointer;">
+            Entrar
+        </button>
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for categoria, mensagem in messages %}
+            <p style="color:{% if categoria == 'erro' %}red{% else %}green{% endif %}; font-weight:bold;">
+                {{ mensagem }}
+            </p>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+
+{% else %}
+<!-- 🛒 Tela de Produtos -->
 {% if mensagem %}
     <p class="mensagem">{{ mensagem }}</p>
 {% endif %}
@@ -10,7 +38,11 @@
 <div class="produtos-container">
     {% for produto in produtos %}
     <div class="card">
-        <img src="{{ produto.link }}" alt="{{ produto.nome }}" class="card-img">
+        {% if produto.link %}
+            <img src="{{ produto.link }}" alt="{{ produto.nome }}" class="card-img">
+        {% else %}
+            <img src="https://via.placeholder.com/150x100?text=Sem+Imagem" alt="Sem imagem" class="card-img">
+        {% endif %}
         <div class="card-body">
             <h5 class="card-title">{{ produto.nome }}</h5>
             <p class="card-text">
@@ -24,11 +56,18 @@
     {% endfor %}
 </div>
 
+{% endif %}
+
 <style>
     body {
         font-family: Arial, sans-serif;
-        background: linear-gradient(to bottom right, #e3f2fd, #fce4ec);
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: #222;
         margin: 20px;
+    }
+
+    h2 {
+        color: white;
     }
 
     .produtos-container {
@@ -36,31 +75,31 @@
         flex-wrap: wrap;
         gap: 20px;
         justify-content: center;
+        margin-top: 20px;
     }
 
     .card {
-        background: linear-gradient(135deg, #004aad 40%, #d32f2f 100%);
-        color: white;
-        border-radius: 12px;
+        background-color: #fff;
+        border: 2px solid #0056b3;
+        border-radius: 10px;
         width: 150px;
         height: 200px;
         text-align: center;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        transition: transform 0.2s, box-shadow 0.2s;
         padding: 8px;
     }
 
     .card:hover {
         transform: scale(1.05);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     .card-img {
         width: 100%;
         height: 100px;
         object-fit: cover;
-        border-radius: 8px;
-        border: 2px solid white;
+        border-radius: 6px;
     }
 
     .card-body {
@@ -69,21 +108,20 @@
 
     .card-title {
         font-size: 14px;
-        margin: 6px 0;
-        font-weight: bold;
-        color: #fff;
+        margin: 4px 0;
+        color: #0d47a1;
     }
 
     .card-text {
         font-size: 12px;
-        color: #f0f0f0;
+        color: #333;
         text-align: left;
         padding: 0 6px;
         line-height: 1.2;
     }
 
     .mensagem {
-        color: #d32f2f;
+        color: rgb(231, 13, 13);
         font-weight: bold;
         margin-top: 10px;
         text-align: center;
