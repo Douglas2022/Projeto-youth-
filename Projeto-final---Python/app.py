@@ -153,12 +153,12 @@ import mysql.connector as my
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import mysql.connector as my
 
+
 @app.route('/Loja', methods=['GET', 'POST'])
 def Loja():
-    mensagem = None
     usuario_nome = session.get('usuario_nome', None)
 
-    # Se o usuário ainda não estiver logado
+    # 🔒 Se o usuário não estiver logado:
     if 'usuario_id' not in session:
         if request.method == 'POST':
             cpf_digitado = request.form.get('cpf', '').replace('.', '').replace('-', '')
@@ -171,6 +171,7 @@ def Loja():
             cursor.close()
             conexao.close()
 
+            # Verifica login
             usuario = None
             for u in usuarios:
                 cpf_banco = u['cpf'].replace('.', '').replace('-', '')
@@ -187,41 +188,29 @@ def Loja():
             else:
                 flash("CPF ou senha incorretos.", "erro")
 
-        # Renderiza apenas o login se não estiver logado
+        # Exibe tela de login se não estiver logado
         return render_template('Loja.html', logado=False)
 
-    # Se o usuário estiver logado, mostra produtos e comentários
+    # ✅ Se o usuário estiver logado, mostra produtos em cards
     try:
         conexao = ConectarBanco()
         cursor = conexao.cursor(dictionary=True)
-
-        # Envio de comentário
-        if request.method == 'POST':
-            produto_id = request.form.get('produto_id')
-            texto = request.form.get('texto', '').strip()
-            if texto:
-                sql_insert = "INSERT INTO comentarios (produto_id, nome_usuario, texto) VALUES (%s, %s, %s)"
-                cursor.execute(sql_insert, (produto_id, usuario_nome, texto))
-                conexao.commit()
-                flash("Comentário enviado com sucesso!", "sucesso")
-            else:
-                flash("O comentário não pode estar vazio.", "erro")
-
-        # Buscar produtos e comentários
         cursor.execute("SELECT * FROM produtos")
         produtos = cursor.fetchall()
-
-        cursor.execute("SELECT * FROM comentarios ORDER BY id DESC")
-        comentarios = cursor.fetchall()
-
         cursor.close()
         conexao.close()
-    except my.Error as err:
-        produtos = []
-        comentarios = []
-        flash(f"Erro ao acessar dados: {err}", "erro")
 
-    return render_template('Loja.html', logado=True, produtos=produtos, comentarios=comentarios, nome=usuario_nome)
+        return render_template(
+            'Loja.html',
+            logado=True,
+            usuario_nome=usuario_nome,
+            produtos=produtos
+        )
+
+    except Exception as e:
+        print("Erro ao carregar produtos:", e)
+        flash("Erro ao carregar produtos.", "erro")
+        return render_template('Loja.html', logado=True, produtos=[], usuario_nome=usuario_nome)
 
 # ---------------- ROTAS ADMIN ---------------- #
 
