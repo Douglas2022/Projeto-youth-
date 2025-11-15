@@ -191,7 +191,7 @@ def excluir_produto(id):
 def excluir_comentario(comentario_id):
     if 'usuario_id' not in session or session.get('usuario_tipo') != 'administrador':
         flash("Acesso negado.", "erro")
-        return redirect(url_for('Loja'))
+        return redirect(url_for('login'))
 
     try:
         conexao = ConectarBanco()
@@ -205,6 +205,7 @@ def excluir_comentario(comentario_id):
         flash(f"Erro ao excluir comentário: {e}", "erro")
 
     return redirect(url_for('cadastraProdutos'))
+
 
 
 
@@ -226,7 +227,8 @@ def comentar_produto(produto_id):
         print("Erro ao adicionar comentário:", e)
         flash("Erro ao adicionar comentário.", "erro")
 
-    return redirect(url_for('Loja'))
+    return redirect(url_for('cliente'))
+
 
 
 # ---------------- MIDDLEWARE ---------------- #
