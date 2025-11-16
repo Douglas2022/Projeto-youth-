@@ -1,7 +1,8 @@
-CREATE DATABASE  SuperSelectD;
+CREATE DATABASE IF NOT EXISTS SuperSelectD;
 USE SuperSelectD;
 
-CREATE TABLE usuarios (
+-- Tabela de usuários
+CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -10,7 +11,7 @@ CREATE TABLE usuarios (
     cpf VARCHAR(14) UNIQUE
 );
 
--- Inserindo 10 clientes
+-- Inserindo 10 usuários
 INSERT INTO usuarios (nome, email, senha, cpf, tipo) VALUES
 ('Daniel Colares', 'daniel@example.com', '123456', '123.456.789-00', 'administrador'),
 ('Maria Souza', 'maria@example.com', 'senha123', '987.654.321-00', 'cliente'),
@@ -23,56 +24,52 @@ INSERT INTO usuarios (nome, email, senha, cpf, tipo) VALUES
 ('Eduardo Nogueira', 'eduardo@example.com', 'teste123', '888.777.666-55', 'cliente'),
 ('Luana Freitas', 'luana@example.com', 'curso2025', '999.000.111-22', 'cliente');
 
-SELECT * FROM usuarios;
-
-CREATE TABLE produtos (
+-- Tabela de produtos
+CREATE TABLE IF NOT EXISTS produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     marca VARCHAR(100) NOT NULL,
     tipo VARCHAR(50),
     preco DECIMAL(10,2) NOT NULL,
-    link VARCHAR(255)
+    quantidade INT DEFAULT 10,       -- valor inicial
+    link VARCHAR(255),
+    validade DATE,
+    vendidos INT DEFAULT 0
 );
 
+-- Inserir produtos com quantidade inicial
+INSERT INTO produtos (nome, marca, tipo, preco, quantidade, link) VALUES
+('Refrigerante Cola', 'Coca-Cola', 'Carbonatada', 5.50, 10, 'https://example.com/img/coca-cola.jpg'),
+('Suco de Laranja', 'Del Valle', 'Natural', 7.20, 10, 'https://example.com/img/suco-laranja.jpg'),
+('Água Mineral', 'Crystal', 'Sem gás', 3.00, 10, 'https://example.com/img/agua-crystal.jpg');
 
-INSERT INTO produtos (nome, marca, tipo, preco, link) VALUES
-('Refrigerante Cola', 'Coca-Cola', 'Carbonatada', 5.50, 'https://example.com/img/coca-cola.jpg'),
-('Suco de Laranja', 'Del Valle', 'Natural', 7.20, 'https://example.com/img/suco-laranja.jpg'),
-('Água Mineral', 'Crystal', 'Sem gás', 3.00, 'https://example.com/img/agua-crystal.jpg');
-
-SELECT * FROM produtos;
-
-CREATE TABLE comentarios (
+-- Tabela de comentários
+CREATE TABLE IF NOT EXISTS comentarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    produto_id INT,
-    texto TEXT,
+    produto_id INT NOT NULL,
+    nome_usuario VARCHAR(100) NOT NULL,
+    texto TEXT NOT NULL,
     data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
 );
-INSERT INTO comentarios (produto_id, texto)
-VALUES (1, 'Produto excelente! Chegou rápido e bem embalado.');
 
-SELECT * FROM comentarios;
+-- Inserir comentário exemplo
+INSERT INTO comentarios (produto_id, nome_usuario, texto)
+VALUES (1, 'Douglas', 'Produto excelente! Chegou rápido e bem embalado.');
 
+-- Visualizar produtos com comentários
 SELECT c.id, p.nome, c.texto, c.data_hora
 FROM comentarios c
 JOIN produtos p ON c.produto_id = p.id;
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '12345';
-FLUSH PRIVILEGES;
+
+-- Configurar usuário root
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '12345';
 FLUSH PRIVILEGES;
 
-FLUSH PRIVILEGES;
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '12345';
-FLUSH PRIVILEGES;
-
+-- Conferir banco e tabelas
 SHOW DATABASES;
 USE SuperSelectD;
 SHOW TABLES;
-
-
-
-
-
-
-
+SELECT * FROM produtos;
+SELECT * FROM usuarios;
+SELECT * FROM comentarios;

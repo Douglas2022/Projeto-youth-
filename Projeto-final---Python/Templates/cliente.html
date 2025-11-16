@@ -1,137 +1,41 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
-<style>
-body {
-    background-color: #f2f2f2;
-    font-family: Arial, sans-serif;
-}
-
-/* ======= TITULO ======= */
-.titulo {
-    text-align: center;
-    margin: 30px 0;
-    color: #333;
-}
-
-/* ======= CONTAINER DOS CARDS ======= */
-.cards-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-}
-
-/* ======= CARD PADRÃO ======= */
-.card {
-    width: 200px;
-    height: 380px; /* Fixei altura igual para todos */
-    background-color: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transition: transform 0.2s ease;
-    display: flex;
-    flex-direction: column;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-}
-
-/* ======= IMAGEM PADRÃO ======= */
-.card img {
-    width: 100%;
-    height: 140px;
-    object-fit: cover;
-}
-
-/* ======= CONTEÚDO DO CARD ======= */
-.card-body {
-    padding: 10px;
-    text-align: center;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.card-body h5 {
-    font-size: 15px;
-    margin: 0;
-    height: 34px; /* Título fixo para não quebrar */
-    overflow: hidden;
-}
-
-.card-body p {
-    font-size: 13px;
-    margin: 3px 0;
-    height: 18px; /* Impede marcas longas de quebrar o card */
-    overflow: hidden;
-}
-
-/* ======= COMENTÁRIOS ======= */
-.comentario-card {
-    width: 100%;
-    background-color: #efefef;
-    border-radius: 8px;
-    padding: 4px 6px;
-    margin-top: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    font-size: 11px;
-    line-height: 1.2;
-    max-height: 32px;       /* Fixa em ~2 linhas */
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* ======= FORM DE COMENTÁRIO ======= */
-textarea {
-    width: 100%;
-    resize: none;
-    font-size: 12px;
-    height: 40px;
-}
-</style>
-
 <h1 class="titulo">🛍️ Nossa Loja</h1>
 
-<!-- Produtos -->
 <div class="cards-container">
     {% for produto in produtos %}
     <div class="card">
+        <!-- Imagem do produto ou placeholder -->
+        {% if produto['link'] %}
+            <img src="{{ url_for('static', filename=produto['link']) }}" alt="{{ produto['nome'] }}">
+        {% else %}
+            <img src="{{ url_for('static', filename='img/placeholder.png') }}" alt="Sem imagem">
+        {% endif %}
 
-        <img src="{{ produto['link'] if produto['link'] else 'https://via.placeholder.com/200x140.png?text=Sem+Imagem' }}" alt="{{ produto['nome'] }}">
-        
         <div class="card-body">
-
             <h5>{{ produto['nome'] }}</h5>
             <p>{{ produto['marca'] }}</p>
             <p><strong>R$ {{ produto['preco'] }}</strong></p>
 
-            <!-- COMENTÁRIOS LIGADOS AO PRODUTO -->
+            <!-- Comentários -->
             {% for comentario in comentarios %}
-            {% if comentario['produto_id'] == produto['id'] %}
-                <div class="comentario-card">
-                    <strong>{{ comentario['usuario'] }}:</strong>
-                    {{ comentario['texto'] }}
-                </div>
-            {% endif %}
+                {% if comentario['produto_id'] == produto['id'] %}
+                    <div class="comentario-card">
+                        <strong>{{ comentario['nome_usuario'] }}:</strong>
+                        {{ comentario['texto'] }}
+                    </div>
+                {% endif %}
             {% endfor %}
 
-            <!-- FORMULÁRIO DE COMENTÁRIO -->
+            <!-- Formulário de comentário -->
             <form method="POST" action="{{ url_for('comentar_produto', produto_id=produto['id']) }}">
                 <input type="hidden" name="nome_usuario" value="{{ session['usuario_nome'] }}">
-                <textarea name="texto" rows="2" placeholder="Comente..." required></textarea>
+                <textarea name="texto" placeholder="Comente..." required></textarea>
                 <button type="submit" class="btn btn-primary btn-sm mt-1">💬 Comentar</button>
             </form>
-
         </div>
     </div>
     {% endfor %}
 </div>
-
-<div class="text-center mt-4 mb-4">
-    <a href="{{ url_for('cliente') }}" class="btn btn-secondary">🔄 Atualizar produtos</a>
-</div>
-
 {% endblock %}
