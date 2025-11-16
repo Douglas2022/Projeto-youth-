@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<h2 style="text-align:center; margin-bottom:20px;">📊 Relatórios do Sistema</h2>
+
+<h3 style="color:#333;">Alertas do Sistema</h3>
+<ul style="background:#fff; padding:15px; border-radius:8px; list-style:none;">
+    {% for alerta in alertas %}
+        <li style="margin-bottom:10px; border-left:5px solid red; padding-left:8px;">
+            <strong>{{ alerta.tipo }}:</strong> {{ alerta.produto }} — {{ alerta.mensagem }}
+        </li>
+    {% else %}
+        <li>Nenhum alerta encontrado.</li>
+    {% endfor %}
+</ul>
+
+<br>
+
+<h3>📦 Produtos Cadastrados</h3>
+<div>
+    {% for p in produtos %}
+        <div style="background:white; padding:10px; border-radius:8px; margin-bottom:12px;">
+            <strong>{{ p.nome }}</strong><br>
+            Preço: R$ {{ "%.2f"|format(p.preco) }}<br>
+            Quantidade: {{ p.quantidade }}<br>
+            Validade: {{ p.validade }}<br>
+        </div>
+    {% endfor %}
+</div>
+
+<br>
+
+<h3>💬 Comentários Recentes</h3>
+<div>
+    {% for c in comentarios %}
+        <div style="background:white; padding:10px; border-radius:8px; margin-bottom:12px;">
+            <strong>{{ c.nome_usuario }}:</strong> {{ c.texto }}<br>
+            Produto ID: {{ c.produto_id }}
+        </div>
+    {% else %}
+        <p>Nenhum comentário.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

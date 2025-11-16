@@ -3,6 +3,16 @@
 {% block conteudo %}
 <h2 style="text-align:center; margin-bottom: 20px;">Cadastro e Gerenciamento de Produtos</h2>
 
+{% if usuario_tipo == 'administrador' %}
+<div style="text-align:center; margin-bottom:15px;">
+    <a href="{{ url_for('relatorios') }}"
+       style="background-color:#38068e; color:white; padding:8px 16px;
+              border-radius:6px; text-decoration:none; font-weight:bold;">
+        📊 Acessar Relatórios
+    </a>
+</div>
+{% endif %}
+
 {% if mensagem %}
     <p class="mensagem">{{ mensagem }}</p>
 {% endif %}

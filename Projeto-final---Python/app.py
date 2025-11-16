@@ -89,6 +89,7 @@ def cliente():
 
     mensagem = None
     usuario_nome = session['usuario_nome']
+    usuario_tipo = session.get('usuario_tipo')  # ← IMPORTANTE
 
     try:
         conexao = ConectarBanco()
@@ -116,7 +117,15 @@ def cliente():
         comentarios = []
         mensagem = f"Erro ao acessar dados: {err}"
 
-    return render_template('cliente.html', produtos=produtos, comentarios=comentarios, mensagem=mensagem, nome=usuario_nome)
+    return render_template(
+        'cliente.html',
+        produtos=produtos,
+        comentarios=comentarios,
+        mensagem=mensagem,
+        usuario_nome=usuario_nome,
+        usuario_tipo=usuario_tipo,   # ← ENVIANDO PARA O HTML
+        logado=True                  # ← AGORA O HTML FUNCIONA
+    )
 
 
 # ---------------- ROTAS ADMIN ---------------- #
@@ -228,6 +237,61 @@ def comentar_produto(produto_id):
         flash("Erro ao adicionar comentário.", "erro")
 
     return redirect(url_for('cliente'))
+
+@app.route('/relatorios')
+def relatorios():
+    if 'usuario_id' not in session or session.get('usuario_tipo') != 'administrador':
+        return redirect(url_for('login'))
+
+    conexao = ConectarBanco()
+    cursor = conexao.cursor(dictionary=True)
+
+    # Busca produtos
+    cursor.execute("SELECT * FROM produtos")
+    produtos = cursor.fetchall()
+
+    # Busca comentários
+    cursor.execute("SELECT * FROM comentarios ORDER BY id DESC")
+    comentarios = cursor.fetchall()
+
+    # Gerar alertas automáticos
+    alertas = []
+
+    from datetime import datetime, timedelta
+    hoje = datetime.now().date()
+
+    for p in produtos:
+
+        # ALERTA: ESTOQUE BAIXO
+        if p['quantidade'] is not None and p['quantidade'] < 5:
+            alertas.append({
+                "produto": p['nome'],
+                "tipo": "Estoque baixo",
+                "mensagem": f"Apenas {p['quantidade']} unidades restantes."
+            })
+
+        # ALERTA: VENCIMENTO PRÓXIMO
+        if p['validade'] is not None:
+            validade = p['validade']
+            dias = (validade - hoje).days
+
+            if dias <= 10:
+                alertas.append({
+                    "produto": p['nome'],
+                    "tipo": "Validade próxima",
+                    "mensagem": f"O produto vence em {dias} dias ({validade})."
+                })
+
+    cursor.close()
+    conexao.close()
+
+    return render_template(
+        'relatorios.html',
+        produtos=produtos,
+        comentarios=comentarios,
+        alertas=alertas
+    )
+
 
 
 
