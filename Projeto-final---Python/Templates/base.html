@@ -3,86 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link rel="stylesheet" href="../static/stile.css" />
+    <title>SuperSelectD</title>
+
+    <!-- Bootstrap -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous"
     />
+
+    <!-- Seu CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   </head>
 
   <body>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #0a2fc2;
-        margin: 0;
-        padding: 0;
-      }
-
-      .container {
-        max-width: 500px;
-        margin: 60px auto;
-        background-color: rgb(215, 15, 15);
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-      }
-
-      h2 {
-        text-align: center;
-        color: #2f3640;
-      }
-
-      label {
-        display: block;
-        margin-top: 15px;
-        font-weight: bold;
-      }
-
-      input,
-      textarea,
-      select {
-        width: 100%;
-        padding: 10px;
-        margin-top: 6px;
-        border: 1px solid #dcdde1;
-        border-radius: 8px;
-        font-size: 15px;
-      }
-
-      button {
-        width: 100%;
-        background-color: #00a8ff;
-        color: white;
-        border: none;
-        padding: 12px;
-        margin-top: 20px;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-
-      button:hover {
-        background-color: #0097e6;
-      }
-    </style>
-
-    <!-- BLOCO PRINCIPAL -->
-    {% block conteudo %}
-    {% endblock %}
+    {% block conteudo %}{% endblock %}
 
     {% if session.usuario_nome %}
-    <p>Olá, {{ session.usuario_nome }}! <a href="{{ url_for('logout') }}">Sair</a></p>
-{% endif %}
+      <p>Olá, {{ session.usuario_nome }}! <a href="{{ url_for('logout') }}">Sair</a></p>
+    {% endif %}
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
   </body>
-
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-    crossorigin="anonymous"
-  ></script>
 </html>
