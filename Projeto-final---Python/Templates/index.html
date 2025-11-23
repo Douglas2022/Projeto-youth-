@@ -1,35 +1,91 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block conteudo %}
+<div class="container" style="background-color: #c91c39; color: #000; border: 2px solid #c91c39;">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('cadastro') }}">Cadastro</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-link active" aria-current="page" href="administrador">Administrador</a>
+          <a class="nav-link active" aria-current="page" href="{{ url_for('cadastraProdutos') }}">
+            Cadastro de produtos
+          </a>
+          <a class="nav-link active" aria-current="page" href="{{url_for('relatorios')}}">Relatorios</a>
+          <a class="nav-link active" aria-current="page"href="{{url_for('logout')}}">Sair</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</div>
 
-{% block conteudo %}
-
-<h1 class="container justify-content-center background-color" style="display: flex;">Página Inicial</h1>
-
-<div style="font-family: Arial, sans-serif; background-color: #2218de; margin: 0; padding: 0;">
-
-  <header style="background-color: #3c08d7; color: white; padding: 15px 20px; text-align: center;">
+<div style="
+    font-family: Arial, sans-serif;
+    background-color: #2218de;
+    margin: 0;
+    padding: 0;
+  ">
+  <header style="
+      background-color: #3c08d7;
+      color: white;
+      padding: 15px 20px;
+      text-align: center;
+    ">
     <h1>Supermercado Online</h1>
     <p>Tudo o que você precisa em um só lugar 🛒</p>
   </header>
 
-  <nav style="background-color: #c91c39; display: flex; justify-content: center; padding: 10px;">
-    <a href="{{ url_for('login') }}" style="color: white; text-decoration: none; margin: 0 15px; font-weight: bold;">Login</a>
-    <a href="{{ url_for('cadastro') }}" style="color: white; text-decoration: none; margin: 0 15px; font-weight: bold;">Cadastro</a>
+  <nav style="
+      background-color: #c91c39;
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+    ">
+    <a href="{{ url_for('login') }}" style="
+        color: white;
+        text-decoration: none;
+        margin: 0 15px;
+        font-weight: bold;
+      ">Login</a>
+    <a href="{{ url_for('cadastro') }}" style="
+        color: white;
+        text-decoration: none;
+        margin: 0 15px;
+        font-weight: bold;
+      ">Cadastro</a>
   </nav>
 
-  <section style="padding: 30px; text-align: center; color: white;">
+  <section style="padding: 30px; text-align: center; color: white">
     <h2>Bem-vindo ao SuperSelectD!</h2>
-    <p>Compre seus produtos favoritos de forma rápida, segura e com os melhores preços.</p>
+    <p>
+      Compre seus produtos favoritos de forma rápida, segura e com os melhores
+      preços.
+    </p>
     <a href="{{ url_for('cliente') }}">
-      <button class="boton" style="background-color: #1515c1; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+      <button class="boton" style="
+          background-color: #1515c1;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 5px;
+          cursor: pointer;
+        ">
         Ver Produtos
       </button>
     </a>
   </section>
 
-  <footer style="background-color: #2b0ed3; color: white; text-align: center; padding: 10px; margin-top: 30px;">
+  <footer style="
+      background-color: #2b0ed3;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      margin-top: 30px;
+    ">
     <p>SuperSelectD © 2025 - Todos os direitos reservados</p>
   </footer>
-
 </div>
 
 {% endblock %}

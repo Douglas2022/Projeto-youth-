@@ -1,6 +1,27 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
+<div class="container" style="background-color: #c91c39; color: #000; border: 2px solid #c91c39;">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('cadastro') }}">Cadastro</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-link active" aria-current="page" href="administrador">Administrador</a>
+          <a class="nav-link active" aria-current="page" href="{{ url_for('cadastraProdutos') }}">
+            Cadastro de produtos
+          </a>
+          <a class="nav-link active" aria-current="page" href="{{url_for('relatorios')}}">Relatorios</a>
+          <a class="nav-link active" aria-current="page"href="{{url_for('logout')}}">Sair</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</div>
 <h2 style="text-align:center; margin-bottom: 20px;">Bem-vindo à Loja Virtual</h2>
 
 {% if not logado %}
@@ -32,7 +53,7 @@
 
 {% if usuario_tipo == 'administrador' %}
 <div style="text-align:center; margin-bottom:20px;">
-    <a href="{{ url_for('relatorios') }}"
+    <a href="{{ url_for('cadastraProdutos') }}"
        style="background-color:#38068e; color:white; padding:8px 16px; border-radius:6px; text-decoration:none;">
         📊 Acessar Relatórios
     </a>
@@ -43,11 +64,15 @@
 <div class="produtos-container">
     {% for produto in produtos %}
     <div class="card">
+
         {% if produto.link %}
-            <img src="{{ produto.link }}" alt="{{ produto.nome }}" class="card-img">
+            <img src="{{ url_for('mostrar_imagem', produto_id=produto.id) }}"
+                 alt="{{ produto.nome }}" class="card-img">
         {% else %}
-            <img src="https://via.placeholder.com/150x100?text=Sem+Imagem" alt="Sem imagem" class="card-img">
+            <img src="https://via.placeholder.com/150x100?text=Sem+Imagem"
+                 alt="Sem imagem" class="card-img">
         {% endif %}
+
         <div class="card-body">
             <h5 class="card-title">{{ produto.nome }}</h5>
             <p class="card-text">
@@ -56,6 +81,7 @@
 
                 {% if usuario_tipo == 'administrador' %}
                 <strong>Comentários:</strong><br>
+
                 {% set tem_comentario = false %}
                 {% for comentario in comentarios %}
                     {% if comentario.produto_id == produto.id %}
@@ -68,10 +94,13 @@
                         {% set tem_comentario = true %}
                     {% endif %}
                 {% endfor %}
+
                 {% if not tem_comentario %}
                     <span style="font-size:11px; color:#555;">Sem comentários ainda</span>
                 {% endif %}
+
                 {% else %}
+
                 <!-- Clientes comentam -->
                 <form method="POST" action="{{ url_for('comentar_produto', produto_id=produto.id) }}" style="margin-top:6px;">
                     <input type="hidden" name="nome_usuario" value="{{ usuario_nome }}">
@@ -81,6 +110,7 @@
                         Comentar
                     </button>
                 </form>
+
                 {% endif %}
             </p>
         </div>

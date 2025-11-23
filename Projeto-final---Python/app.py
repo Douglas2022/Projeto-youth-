@@ -32,6 +32,11 @@ def ConectarBanco():
 def index():
     return render_template('index.html')
 
+@app.route('/administrador')
+def administrador():
+    return render_template('administrador.html')
+
+
 @app.route('/cliente')
 def cliente():
     try:
@@ -165,42 +170,98 @@ def cadastraProdutos():
         conexao = ConectarBanco()
         cursor = conexao.cursor(dictionary=True)
 
+        # --------------------
+        #     SE FOR POST
+        # --------------------
+        if request.method == 'POST':
+            nome = request.form.get('nome')
+            marca = request.form.get('marca')
+            tipo = request.form.get('tipo')
+            preco = request.form.get('preco')
+            quantidade = request.form.get('quantidade')
+            link = request.form.get('link')
+
+            sql = """
+                INSERT INTO produtos (nome, marca, tipo, preco, quantidade, link)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(sql, (nome, marca, tipo, preco, quantidade, link))
+            conexao.commit()
+
+            flash("Produto cadastrado com sucesso!", "sucesso")
+
+            # Redireciona para a mesma página para evitar reenvio de formulário
+            return redirect(url_for('cadastraProdutos'))
+
+        # --------------------
+        #     SE FOR GET
+        # --------------------
         cursor.execute("SELECT * FROM produtos")
         produtos = cursor.fetchall()
 
         cursor.close()
         conexao.close()
 
-        return render_template('cadastraProdutos.html', produtos=produtos)
+        return render_template(
+            'cadastraProdutos.html',
+            produtos=produtos,
+            usuario_tipo=session.get('usuario_tipo')
+        )
 
     except my.Error as err:
-        return render_template('cadastraProdutos.html', produtos=[], mensagem=f"Erro: {err}")
-    
-@app.route('/comentar/<int:produto_id>', methods=['POST'])
-def comentar(produto_id):
-    nome_usuario = request.form.get('nome_usuario', '').strip()
-    texto = request.form.get('texto', '').strip()
-
-    if not nome_usuario or not texto:
-        flash("Preencha todos os campos!", "erro")
-        return redirect(url_for('cliente'))
-
-    try:
-        conexao = ConectarBanco()
-        cursor = conexao.cursor()
-        cursor.execute(
-            "INSERT INTO comentarios (produto_id, nome_usuario, texto) VALUES (%s, %s, %s)",
-            (produto_id, nome_usuario, texto)
+        return render_template(
+            'cadastraProdutos.html', 
+            produtos=[], 
+            mensagem=f"Erro: {err}",
+            usuario_tipo=session.get('usuario_tipo')
         )
-        conexao.commit()
+
+    
+@app.route('/comentar/<int:produto_id>', methods=['GET', 'POST'])
+def comentar(produto_id):
+    if 'usuario_id' not in session:
+        flash("Faça login para comentar.", "erro")
+        return redirect(url_for('home'))
+
+    conexao = ConectarBanco()
+    cursor = conexao.cursor(dictionary=True)
+
+    # Buscar dados do produto
+    cursor.execute("SELECT * FROM produtos WHERE id = %s", (produto_id,))
+    produto = cursor.fetchone()
+
+    if not produto:
         cursor.close()
         conexao.close()
-        flash("Comentário adicionado com sucesso!", "sucesso")
-    except my.Error as e:
-        flash(f"Erro ao salvar comentário: {e}", "erro")
+        flash("Produto não encontrado.", "erro")
+        return redirect(url_for('home'))
 
-    return redirect(url_for('cliente'))
+    # Se enviou o formulário
+    if request.method == "POST":
+        texto = request.form.get("texto")
+        nome_usuario = session.get("usuario_nome")
 
+        if texto:
+            cursor.execute("""
+                INSERT INTO comentarios (produto_id, nome_usuario, texto)
+                VALUES (%s, %s, %s)
+            """, (produto_id, nome_usuario, texto))
+            conexao.commit()
+
+            flash("Comentário enviado!", "sucesso")
+
+            cursor.close()
+            conexao.close()
+            return redirect(url_for('home'))
+
+    # Se for GET → mostra a página de comentário
+    cursor.execute("SELECT * FROM comentarios WHERE produto_id = %s", (produto_id,))
+    comentarios = cursor.fetchall()
+
+    cursor.close()
+    conexao.close()
+
+    return render_template("comentar.html", produto=produto, comentarios=comentarios)
 
 @app.route('/excluir_produto/<int:id>', methods=['POST'])
 def excluir_produto(id):
@@ -252,7 +313,7 @@ def mostrar_imagem(produto_id):
 def logout():
     session.clear()
     flash("Você saiu da conta.", "sucesso")
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 @app.route('/produtos_json')
 def produtos_json():
@@ -263,6 +324,11 @@ def produtos_json():
     cursor.close()
     conexao.close()
     return {"produtos": produtos}
+
+@app.route('/relatorios')
+def relatorios():
+    return render_template('relatorios.html')
+
 
 
 if __name__ == '__main__':
