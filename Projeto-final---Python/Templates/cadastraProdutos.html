@@ -5,23 +5,27 @@
 <div class="container" style="background-color: #c91c39; color: #000; border: 2px solid #c91c39;">
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-      <a class="navbar-brand" href="{{ url_for('cadastro') }}">Cadastro</a>
+      <a class="btn btn-danger me-3" href="{{ url_for('cadastro') }}">Cadastro</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
         aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <!-- Links à esquerda -->
         <div class="navbar-nav">
-          <a class="nav-link active" aria-current="page" href="administrador">Administrador</a>
-          <a class="nav-link active" aria-current="page" href="{{ url_for('cadastraProdutos') }}">
-            Cadastro de produtos
-          </a>
-          <a class="nav-link active" aria-current="page" href="{{url_for('relatorios')}}">Relatorios</a>
-          <a class="nav-link active" aria-current="page"href="{{url_for('logout')}}">Sair</a>
+          <a class="btn btn-danger me-3" href="administrador">Administrador</a>
+          <a class="btn btn-danger me-3" href="{{ url_for('cadastraProdutos') }}">Cadastro de produtos</a>
+          <a class="btn btn-danger me-3" href="{{ url_for('relatorios') }}">Relatorios</a>
+        </div>
+
+
+        <div class="navbar-nav ms-auto">
+          <a class="btn btn-danger" href="{{ url_for('logout') }}">Sair</a>
         </div>
       </div>
+
+
     </div>
-  </nav>
 </div>
 <h2 style="text-align:center; margin-bottom: 20px;">Cadastro e Gerenciamento de Produtos</h2>
 
